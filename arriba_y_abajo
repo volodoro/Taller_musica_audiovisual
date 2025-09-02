@@ -1,0 +1,125 @@
+let oscillators = [];
+let colors;
+let lineY;
+let lineSpeed = 1.5; // <--- Puedes cambiar esta variable para modificar la velocidad
+let lineDirection = -1; // -1: sube, 1: baja
+
+function setup() {
+  createCanvas(600, 600);
+  angleMode(RADIANS);
+  userStartAudio();
+
+  lineY = height - 25; // Línea empieza visible justo en la parte inferior
+
+  colors = [
+    color(255, 0, 0),     // rojo
+    color(255, 255, 0),   // amarillo
+    color(0, 0, 139),     // azul oscuro
+    color(0, 255, 0)    // magenta
+  ];
+
+  let spacing = height / 5;
+  for (let i = 0; i < 4; i++) {
+    let y = spacing * (i + 1);
+    oscillators.push(new VisualOscillator(width / 2, y, colors[i], i));
+  }
+}
+
+function draw() {
+  background(0);
+
+  // Dibujar la línea blanca
+  noStroke();
+  fill(255);
+  rect(0, lineY - 25, width, 50);
+  
+    // --- TEXTO CENTRADO DENTRO DE LA LÍNEA BLANCA ---
+
+  let t = map(lineY, height - 25, 25, 0, 255); // Mapea posición Y a valor de color
+
+  textAlign(CENTER, CENTER);
+  textSize(24);
+  fill(t, 255 - t, t); // Color dinámico (puedes cambiar esta combinación)
+  noStroke();
+  text("<<< A R R I B A  Y  A B A J O > > >", width / 2, lineY); // Centrado en la línea blanca
+
+
+  // Actualizar posición vertical de la línea blanca
+  lineY += lineDirection * lineSpeed;
+
+  // Rebotar arriba y abajo
+  if (lineY <= 25 || lineY >= height - 25) {
+    lineDirection *= -1;
+  }
+
+  // Calcular factor de modulación por altura (0 a 7 semitonos)
+  let semitoneRange = 7;
+  let semitones = map(lineY, height - 25, 25, 0, semitoneRange);
+  let globalPitchFactor = pow(2, semitones / 12.0);
+
+  // Actualizar y mostrar cada oscilador
+  for (let osc of oscillators) {
+    osc.update(globalPitchFactor);
+    osc.display();
+  }
+}
+
+class VisualOscillator {
+  constructor(x, y, c, index) {
+    this.x = x;
+    this.y = y;
+    this.color = c;
+
+    this.len = 75;
+    this.angle = random(QUARTER_PI);
+    this.angularVelocity = random(0.01, 0.09);
+    this.clockwise = random([true, false]);
+
+    this.vx = random(1, 2);
+    this.direction = random([1, -1]);
+
+    this.baseFreq = 220 + index * 110; // Tono base por oscilador
+    this.osc = new p5.Oscillator('sine');
+    this.osc.amp(0.1);
+    this.osc.start();
+  }
+
+  update(globalPitchFactor) {
+    // Cambiar rotación aleatoriamente
+    if (random(1) < 0.009) {
+      this.clockwise = !this.clockwise;
+    }
+
+    // Rotación
+    if (this.clockwise) {
+      this.angle += this.angularVelocity;
+    } else {
+      this.angle -= this.angularVelocity;
+    }
+
+    // Movimiento horizontal
+    this.x += this.vx * this.direction;
+
+    if (this.x <= 25 || this.x >= width - 25) {
+      this.direction *= -1;
+      this.clockwise = random([true, false]); // Cambio aleatorio al rebotar
+    }
+
+    // Factor de tono por sentido de rotación
+    let rotationFactor = this.clockwise ? 1.5 : 0.5;
+
+    // Frecuencia final
+    let finalFreq = this.baseFreq * rotationFactor * globalPitchFactor;
+    this.osc.freq(finalFreq);
+  }
+
+  display() {
+    stroke(this.color);
+    strokeWeight(4);
+    push();
+    translate(this.x, this.y);
+    rotate(this.angle);
+    line(-this.len / 2, 0, this.len / 2, 0);
+    pop();
+  }
+}
