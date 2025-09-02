@@ -1,0 +1,30 @@
+let nX = 600;
+//let nY = 600;
+
+function setup() {
+  createCanvas(nX,nX);
+}
+
+function draw() {
+  //Podemos expresar el tamaño del lienzo como variable para así no tener que declararlo 
+  //cada vez que queramos acceder a éste
+  background(0);
+  stroke(255,0,100);
+  strokeWeight(10);
+  point(noise(mouseX)*nX,noise(mouseY)*nX);
+  
+  stroke(255,255,0);
+  strokeWeight(random(10));
+  line(0,0,noise(mouseX)*nX,noise(mouseY)*nX);
+  
+    
+  stroke(0,255,0);
+  strokeWeight(random(30));
+  line(nX,nX,noise(mouseX)*nX,noise(mouseY)*nX);
+  
+    
+    
+  stroke(255,0,0);
+  strokeWeight(random(50));
+  line(nX,0,noise(mouseX)*nX,noise(mouseY)*nX);
+  
