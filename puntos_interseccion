@@ -1,0 +1,49 @@
+let nX = 600;
+//let nY = 600;
+
+function setup() {
+  createCanvas(nX,nX);
+  osc = new p5.Oscillator('sine');
+  osc.freq(440);
+  osc.amp(0.25);
+  osc.start();
+  
+  osc2 = new p5.Oscillator('sine');
+  osc2.freq(440);
+  osc2.amp(0.25);
+  osc2.start();
+  
+  
+frameRate(60);
+  
+}
+
+function draw() {
+  /*osc.freq(pX); //-----> ocupamos el módulo
+  osc.amp(pY); // -----> Escalamos a la altura del lienzo BENJA CHUPALO*/
+  //Podemos expresar el tamaño del lienzo como variable para así no tener que declararlo 
+  //cada vez que queramos acceder a éste
+  background(0);
+  let pX = frameCount%nX;
+  let pY = 0.5*nX;
+  stroke(255,0,100);
+  strokeWeight(10);
+  point(pX,pY);
+  
+  
+  osc.freq(pX); //-----> ocupamos el módulo
+ // osc.amp(pY); // -----> Escalamos a la altura del lienzo BENJA CHUPALO
+  
+  let pX2 = 0.5*nX;
+  let pY2 = frameCount%nX;
+  stroke(0,255,100);
+  strokeWeight(10);
+  point(pX2,pY2);
+  
+  
+  osc2.freq(pX2); //-----> ocupamos el módulo
+ // osc2.amp(pY2); // -----> Escalamos a la altura del lienzo BENJA CHUPALO
+  
+  
+  
+}
