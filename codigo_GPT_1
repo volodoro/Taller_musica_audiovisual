@@ -1,0 +1,103 @@
+let oscillators = [];
+let colors;
+
+function setup() {
+  createCanvas(600, 600);
+  background(0);
+  angleMode(RADIANS);
+
+  // Requerido para interacción de audio en navegadores
+  userStartAudio();
+
+  // Colores: rojo, amarillo, azul oscuro, magenta
+  colors = [
+    color(255, 0, 0),
+    color(255, 255, 0),
+    color(0, 0, 139),
+    color(255, 0, 255)
+  ];
+
+  let spacing = height / 5;
+  for (let i = 0; i < 4; i++) {
+    let y = spacing * (i + 1);
+    oscillators.push(new VisualOscillator(width / 2, y, colors[i], i));
+  }
+}
+
+function draw() {
+  background(0);
+  for (let osc of oscillators) {
+    osc.update();
+    osc.display();
+  }
+}
+
+class VisualOscillator {
+  constructor(x, y, c, index) {
+    this.x = x;
+    this.y = y;
+    this.color = c;
+
+    this.len = 50;
+    this.angle = random(TWO_PI);
+    this.angularVelocity = random(0.01, 0.05);
+    this.clockwise = random([true, false]);
+
+    this.vx = random(1, 2);
+    this.direction = random([1, -1]);
+
+    // Audio oscillator
+    this.osc = new p5.Oscillator('sine');
+    this.osc.amp(0.1);
+    this.osc.start();
+    this.baseFreq = 220 + index * 110; // diferentes tonos base
+
+    this.updateFreq();
+  }
+
+  update() {
+    // Probabilidad de cambiar sentido aleatoriamente
+    if (random(1) < 0.005) {
+      this.clockwise = !this.clockwise;
+    }
+
+    // Actualizar rotación
+    if (this.clockwise) {
+      this.angle += this.angularVelocity;
+    } else {
+      this.angle -= this.angularVelocity;
+    }
+
+    // Ajustar la velocidad de rotación según sentido
+    this.angularVelocity = map(this.direction, -1, 1, 0.01, 0.05);
+
+    // Movimiento horizontal
+    this.x += this.vx * this.direction;
+
+    // Rebote en bordes
+    if (this.x <= 25 || this.x >= width - 25) {
+      this.direction *= -1;
+      this.clockwise = random([true, false]); // cambia sentido aleatoriamente
+    }
+
+    // Actualizar frecuencia del oscilador
+    this.updateFreq();
+  }
+
+  updateFreq() {
+    // Cambiar frecuencia dependiendo del sentido de rotación
+    let freqOffset = this.clockwise ? 1.5 : 0.5;
+    let freq = this.baseFreq * freqOffset;
+    this.osc.freq(freq);
+  }
+
+  display() {
+    stroke(this.color);
+    strokeWeight(4);
+    push();
+    translate(this.x, this.y);
+    rotate(this.angle);
+    line(-this.len / 2, 0, this.len / 2, 0);
+    pop();
+  }
+}
